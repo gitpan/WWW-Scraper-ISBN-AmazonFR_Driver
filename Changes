@@ -1,5 +1,9 @@
 Revision history for WWW-Scraper-ISBN-AmazonFR_Driver
 
+0.02    03/2007
+	Add error cases in search see documentation.
+	Improved tests.
+
 0.01    03/2007
         First version, released on an unsuspecting world.
 

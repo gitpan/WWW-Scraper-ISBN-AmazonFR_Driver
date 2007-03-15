@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 #--------------------------------------------------------------------------
 
@@ -88,31 +88,29 @@ sub search {
 	$self->book(undef);
 
 	my $mechanize = WWW::Mechanize->new();
-
 	$mechanize->get( SEARCH );
+	return	$self->handler('Error loading amazon.fr form web page (unreachable?)')
+	    unless($mechanize->success());
 
-
-	return	unless($mechanize->success());
 
 	my ($index,$input) = (0,0);
 
-
-	# The search form
-	$mechanize->form_name('site-search');
+	$mechanize->form_name('site-search')
+	    or return $self->handler('Error parsing amazon.fr form');
 
 	my $keyword;
 	# This is to search for books 
         # (<select name="url"><option name="url" value="">... 
 	$keyword ='search-alias=stripbooks';
-
-
-	$mechanize->set_fields( 'field-keywords' => $isbn, 'url' => $keyword );
-
+	$mechanize->set_fields( 
+				'field-keywords' => $isbn, 
+				'url' => $keyword 
+				);
 	$mechanize->submit();
 
 
-
-	return	unless($mechanize->success());
+	return	$self->handler('Error about form submission (form changed?)') 
+	    unless($mechanize->success());
 
 
         my $content=$mechanize->content();
@@ -194,6 +192,30 @@ sub search {
 
 1;
 __END__
+
+=back
+
+=head1 DIAGNOSTICS
+
+C<search()> set the attribute C<handler> of the object it returns. Several cases are possible :
+
+=over
+
+=item Impossibility to reach Amazon.fr
+
+  Error loading amazon.fr form web page (unreachable?)
+
+=item Wrong web page or possible changes in Amazon designed
+
+  Error parsing amazon.fr form
+
+=item Lost connection to Amazon or possible changes in Amazon designed
+
+  Error about form submission (form changed?)
+
+=item Error in parsing the answer of Amazon (my mistake?)
+
+  Could not extract data from amazon.fr result page
 
 =back
 
